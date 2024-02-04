@@ -1,4 +1,4 @@
-# BERT-Maze
+# Maze-BERT
 
 This directory adapts the original [Maze](https://github.com/vboyce/Maze) code to more easily support additional languages and modern neural net architectures. Concretely, we replace the original RNN language model with a Transformer from the huggingface repository; this makes it easy to load in a model from another language (or a multilingual model) by changing the model name in the params file. 
 
