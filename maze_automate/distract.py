@@ -20,7 +20,6 @@ args = parser.parse_args()
 Arguments:
 infile = where input is
 outfile = where to write output to
-lang_model = either "gulordava" or "one_b" for which language model to use
 out_format = either "basic" (for a semicolon delimited output) or "ibex" for ibex ready output
 Returns: none'''
 if args.parameters==None:

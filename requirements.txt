@@ -1,0 +1,6 @@
+nltk
+transformers
+tokenizers
+torch
+wordfreq[cjk]
+wget
