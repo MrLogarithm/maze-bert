@@ -2,6 +2,8 @@ import logging
 from utils import copy_punct, strip_punct
 from limit_repeats import Repeatcounter
 
+import numpy as np
+
 def no_duplicates(my_list):
     """True if list has no duplicates, else false"""
     return len(my_list) == len(set(my_list))
@@ -31,17 +33,26 @@ class Sentence:
             logging.error("duplicate labels on sentence %s", " ".join(words))
             raise ValueError("duplicate labels")
 
-    def do_model(self, model):
+    def do_model(self, model, top_k=30522):
         """Run the model and record surprisals at each position"""
-        hidden = model.empty_sentence()  # initialize
-        for i in range(len(self.words) - 1):  # use labels to index
-            hidden, self.probs[self.labels[i + 1]] = model.update(hidden, self.words[i])
+        for i in range(len(self.words)):
+            masked = ' '.join(self.words[:i] + ['[MASK]'] + self.words[i+1:]).lower()
+            masked = masked.replace("[mask]", "[MASK]")
+            output = model(masked, top_k=top_k)
+            output = {candidate["token_str"]: candidate['score'] for candidate in output}
+            self.probs[self.labels[i]] = output
 
-    def do_surprisal(self, model):
+    def do_surprisal(self):
         """Get surprisals of words in sentence"""
         for i in range(1, len(self.labels)):  # zeroeth position doesn't count
             lab = self.labels[i]
-            self.surprisal[lab] = model.get_surprisal(self.probs[lab], self.words[i])
+            word = self.words[i].strip(".,!?:;()")
+            try:
+                target_score = self.probs[lab][word]
+                Z = sum(np.exp(score) for candidate, score in self.probs[lab].items())
+                self.surprisal[lab] = -1 * np.log2(np.exp(target_score)/Z)
+            except:
+                self.surprisal[lab] = 0
 
 
 class Label:
@@ -61,7 +72,7 @@ class Label:
         self.probs.append(probs)
         self.surprisals.append(surprisal)
 
-    def choose_distractor(self, model, dict, threshold_func, params, banned):
+    def choose_distractor(self, dictionary, threshold_func, params, banned):
         """Given a parameters specified in params and stuff
         Find a distractor not on banned (banned=already used in same sentence set)
         That hopefully meets threshold"""
@@ -69,19 +80,26 @@ class Label:
             self.surprisal_targets.append(max(params["min_abs"], surprisal + params["min_delta"]))
         # get us some distractor candidates
         min_length, max_length, min_freq, max_freq = threshold_func(self.words)
-        distractor_opts = dict.get_potential_distractors(min_length, max_length, min_freq, max_freq, params)
+        distractor_opts = dictionary.get_potential_distractors(min_length, max_length, min_freq, max_freq, params)
         avoid=[]
         for word in self.words: #it's real awkward if the distractor is the same as the real word, so let's not do that
             avoid.append(strip_punct(word).lower())
         # initialize
         best_word = "x-x-x"
         best_min_surp = 0
+        Zs = dict()
         for dist in distractor_opts:
             if dist not in banned and dist not in avoid:  # if we've already used it in this sentence set, don't bother
                 good = True
                 min_surp = 100
                 for i in range(len(self.probs)):  # check distractor candidate against each sentence's probs
-                    dist_surp = model.get_surprisal(self.probs[i], dist)
+                    if dist in self.probs[i]:
+                        if i not in Zs:
+                            Zs[i] = sum(np.exp(score) for candidate, score in self.probs[i].items())
+                        Z = Zs[i]
+                        dist_surp = -1 * np.log2(np.exp(self.probs[i][dist])/Z)
+                    else:
+                        dist_surp = 0
                     if dist_surp < self.surprisal_targets[i]:
                         good = False  # it doesn't meet the target
                         min_surp = min(min_surp, dist_surp)  # but we should keep track of the lowest anyway
@@ -126,10 +144,10 @@ class Sentence_Set:
         for sentence in self.sentences:
             sentence.do_model(model)
 
-    def do_surprisals(self, model):
+    def do_surprisals(self):
         """Gets surprisals for the real words"""
         for sentence in self.sentences:
-            sentence.do_surprisal(model)
+            sentence.do_surprisal()
 
     def make_labels(self):
         """Regroups the stuff in the sentence items into by-label groups"""
@@ -140,11 +158,11 @@ class Sentence_Set:
                 lab = sentence.labels[i]
                 self.labels[lab].add_sentence(sentence.words[i], sentence.probs[lab], sentence.surprisal[lab])
 
-    def do_distractors(self, model, d, threshold_func, params, repeats):
+    def do_distractors(self, d, threshold_func, params, repeats):
         """Get distractors using specified stuff"""
         banned = repeats.banned[:] #don't allow duplicate distractors within the set
         for label in self.labels.values(): #get distractors for each label
-            dist = label.choose_distractor(model, d, threshold_func, params, banned)
+            dist = label.choose_distractor(d, threshold_func, params, banned)
             banned.append(dist)
             repeats.increment(dist)
         for sentence in self.sentences: #give the sentences the distractors

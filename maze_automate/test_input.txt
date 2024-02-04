@@ -1,4 +1,1 @@
-sample;1;The dog chased the cat around and around the house.
-sample;2;The cat ran far, far away from the dog.
-sub_rel;3;The cat who the dog scared hid in a box.;pre_1 pre_2 who art noun verb main_verb post_1 post_2 post_3
-obj_rel;3;The dog who scared the cat sniffed around the couch.;pre_1 pre_2 who verb art noun main_verb post_1 post_2 post_3
+sample;1;큰까마귀는 인간과 오랫동안 어울려 살아왔고, 어떤 지역에서는 수가 너무 많아서 해수 취급을 하기도 한다.

@@ -55,6 +55,32 @@ class wordfreq_dict(distractor_dict):
         return distractor_opts
 
 
+class wordfreq_Korean_dict(wordfreq_dict):
+    """Dictionary built using word freq for frequencies
+     Words need to be in wordfreq's vocab, also in include file if provided
+     and not in exclude file
+     words must be lowercase alpha only"""
+
+    def __init__(self, params={}):
+        exclude = params.get("exclude_words", "exclude.txt")
+        #include = params.get("include_words", "extra_vocab.txt")
+        dict = wordfreq.get_frequency_dict('ko')
+        keys = dict.keys()
+        self.words = []
+        exclusions = []
+
+        if exclude is not None:
+            with open(exclude, "r", encoding="utf-8") as f:
+                for line in f:
+                    word = line.strip()
+                    exclusions.append(word)
+        words = list(set(keys) - set(exclusions))
+        for word in words:
+            if re.match(u"^[\u3131-\ucb4b]*$", word):
+                freq = math.log(
+                    dict[word] * 10 ** 9)  # we canonically calculate frequency as log occurrences/1 billion words
+                self.words.append(distractor(word, freq))
+
 class wordfreq_English_dict(wordfreq_dict):
     """Dictionary built using word freq for frequencies
      Words need to be in wordfreq's vocab, also in include file if provided
