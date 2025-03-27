@@ -49,8 +49,7 @@ class Sentence:
             word = self.words[i].strip(".,!?:;()")
             try:
                 target_score = self.probs[lab][word]
-                Z = sum(np.exp(score) for candidate, score in self.probs[lab].items())
-                self.surprisal[lab] = -1 * np.log2(np.exp(target_score)/Z)
+                self.surprisal[lab] = -1 * np.log2(target_score)
             except:
                 self.surprisal[lab] = 0
 
@@ -93,13 +92,10 @@ class Label:
                 good = True
                 min_surp = 1e5
                 for i in range(len(self.probs)):  # check distractor candidate against each sentence's probs
-                    if dist in self.probs[i]:
-                        if i not in Zs:
-                            Zs[i] = sum(np.exp(score) for candidate, score in self.probs[i].items())
-                        Z = Zs[i]
-                        dist_surp = -1 * np.log2(np.exp(self.probs[i][dist])/Z)
-                    else:
+                    if dist not in self.probs[i]:
                         dist_surp = 1e5
+                    else:
+                        dist_surp = -1 * np.log2(self.probs[i][dist])
 
                     if dist_surp < self.surprisal_targets[i]:
                         good = False  # it doesn't meet the target
