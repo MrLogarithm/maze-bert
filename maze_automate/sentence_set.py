@@ -91,7 +91,7 @@ class Label:
         for dist in distractor_opts:
             if dist not in banned and dist not in avoid:  # if we've already used it in this sentence set, don't bother
                 good = True
-                min_surp = 100
+                min_surp = 1e5
                 for i in range(len(self.probs)):  # check distractor candidate against each sentence's probs
                     if dist in self.probs[i]:
                         if i not in Zs:
@@ -99,7 +99,8 @@ class Label:
                         Z = Zs[i]
                         dist_surp = -1 * np.log2(np.exp(self.probs[i][dist])/Z)
                     else:
-                        dist_surp = 0
+                        dist_surp = 1e5
+
                     if dist_surp < self.surprisal_targets[i]:
                         good = False  # it doesn't meet the target
                         min_surp = min(min_surp, dist_surp)  # but we should keep track of the lowest anyway
@@ -109,7 +110,7 @@ class Label:
                 if min_surp > best_min_surp:  # best so far
                     best_min_surp = min_surp
                     best_word = dist
-        logging.warning("Could not find a word to meet threshold for item %s, label %s, returning %s with %d min surp instead",
+        logging.warning("Could not find a word to meet threshold for item %s, label %s, returning %s with %f min surp instead",
             self.id, self.lab, best_word, best_min_surp)
         self.distractor = best_word
         return self.distractor
