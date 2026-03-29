@@ -9,7 +9,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-For additional details, you can also consult the original installation and usage instructions at [vboyce.github.io/Maze/install.html](https://vboyce.github.io/Maze/install.html), though note that this fork has diverged enough that those instructions may no longer be very relevant.
+For additional details, you can also consult the original installation and usage instructions at [vboyce.github.io/Maze/install.html](https://vboyce.github.io/Maze/install.html), or the original documentation in the [vboyce/Maze](https://github.com/vboyce/Maze/tree/master/docs) repository, though note that this fork has diverged enough that those instructions may no longer be very relevant.
 
 ## Usage
 ```bash
