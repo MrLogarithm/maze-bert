@@ -1,0 +1,13 @@
+#These are required
+min_delta: 2
+min_abs: 15
+num_to_test: 200
+#These are not required, but if they aren't here you get the defaults
+dictionary_loc: "wordfreq_distractor"
+dictionary_class: "wordfreq_Spanish_dict"
+threshold_loc: "wordfreq_distractor"
+threshold_name: "get_thresholds"
+exclude_words: "exclude.txt"
+include_words: "whitelists/words.spanish.latin1"
+model_path: "dccuchile/bert-base-spanish-wwm-uncased"
+max_repeat: 0

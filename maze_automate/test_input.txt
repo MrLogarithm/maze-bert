@@ -1,1 +1,5 @@
-sample;1;큰까마귀는 인간과 오랫동안 어울려 살아왔고, 어떤 지역에서는 수가 너무 많아서 해수 취급을 하기도 한다.
+samples;1;El sol se oculta detrás de las montañas mientras los pájaros regresan a sus nidos.
+samples;2;Aunque hacía frío, decidieron caminar hasta la playa para ver el amanecer.
+samples;3;Los niños estaban jugando en el parque cuando empezó a llover fuerte.
+samples;4;Ella siempre se olvida de comprar pan, aunque lo apunte en la lista de compras.
+samples;5;La biblioteca del pueblo es un lugar tranquilo donde se puede leer sin interrupciones.
